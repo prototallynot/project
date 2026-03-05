@@ -1,2 +1,1322 @@
-project
-hi
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>手机学习助手</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #FDF6EC;
+      --fg: #2D2A26;
+      --muted: #8B8680;
+      --accent: #E85D3B;
+      --accent-light: #FFEEE9;
+      --card: #FFFFFF;
+      --border: #E8E2DA;
+      --success: #4A9B7F;
+      --phone-bg: #1A1A1A;
+    }
+   
+    * { font-family: 'Noto Sans SC', sans-serif; }
+    body { background: var(--bg); color: var(--fg); }
+   
+    .warm-bg {
+      background:
+        radial-gradient(ellipse at 20% 20%, rgba(232, 93, 59, 0.08) 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 80%, rgba(74, 155, 127, 0.06) 0%, transparent 50%),
+        var(--bg);
+    }
+   
+    .phone-frame {
+      background: linear-gradient(145deg, #2a2a2a 0%, #1a1a1a 100%);
+      border-radius: 40px;
+      padding: 12px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    }
+   
+    .phone-screen {
+      background: linear-gradient(180deg, #f5f5f5 0%, #ffffff 100%);
+      border-radius: 32px;
+      overflow: hidden;
+      position: relative;
+    }
+   
+    .phone-notch {
+      position: absolute;
+      top: 8px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 80px;
+      height: 24px;
+      background: #1a1a1a;
+      border-radius: 12px;
+      z-index: 10;
+    }
+   
+    .phone-exterior {
+      background: linear-gradient(145deg, #3a3a3a 0%, #1a1a1a 100%);
+      border-radius: 36px;
+      padding: 8px;
+      position: relative;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255,255,255,0.1);
+    }
+   
+    .phone-exterior-screen {
+      background: #111;
+      border-radius: 28px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+    }
+   
+    .phone-button {
+      position: absolute;
+      background: linear-gradient(180deg, #4a4a4a 0%, #2a2a2a 100%);
+      border-radius: 2px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+   
+    .phone-button:hover { background: linear-gradient(180deg, #5a5a5a 0%, #3a3a3a 100%); }
+    .phone-button:active { transform: scale(0.95); }
+    .phone-button.highlight { box-shadow: 0 0 0 3px var(--accent), 0 0 20px rgba(232, 93, 59, 0.5); }
+   
+    .power-button { width: 4px; height: 60px; right: -4px; top: 100px; }
+    .volume-up { width: 4px; height: 40px; left: -4px; top: 80px; }
+    .volume-down { width: 4px; height: 40px; left: -4px; top: 130px; }
+   
+    .annotation { position: absolute; display: flex; align-items: center; opacity: 0; transition: opacity 0.4s; }
+    .annotation.visible { opacity: 1; }
+    .annotation-line { width: 40px; height: 2px; background: var(--accent); position: relative; }
+    .annotation-line::before { content: ''; position: absolute; width: 8px; height: 8px; background: var(--accent); border-radius: 50%; }
+    .annotation-text { background: var(--accent); color: white; padding: 8px 14px; border-radius: 10px; font-weight: 700; font-size: 14px; white-space: nowrap; margin-left: 8px; }
+   
+    .charging-port { position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%); width: 30px; height: 4px; background: #333; border-radius: 2px; }
+    .speaker-holes { position: absolute; bottom: -4px; display: flex; gap: 3px; }
+    .speaker-hole { width: 3px; height: 4px; background: #333; border-radius: 1px; }
+   
+    .app-icon {
+      width: 56px; height: 56px; border-radius: 14px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; position: relative;
+    }
+    .app-icon:hover { transform: scale(1.08); }
+    .app-icon:active { transform: scale(0.95); }
+    .app-icon.highlight { animation: pulse-highlight 1.5s ease-in-out infinite; }
+   
+    @keyframes pulse-highlight {
+      0%, 100% { box-shadow: 0 0 0 4px rgba(232, 93, 59, 0.4); }
+      50% { box-shadow: 0 0 0 12px rgba(232, 93, 59, 0); }
+    }
+   
+    .tip-bubble {
+      background: var(--accent); color: white;
+      padding: 16px 20px; border-radius: 16px;
+      position: relative; animation: float-in 0.4s ease-out;
+      max-width: 320px;
+    }
+    .tip-bubble::before { content: ''; position: absolute; width: 0; height: 0; border: 12px solid transparent; }
+    .tip-bubble.arrow-bottom::before { bottom: -20px; left: 50%; transform: translateX(-50%); border-top-color: var(--accent); }
+   
+    @keyframes float-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+   
+    .step-indicator { display: flex; gap: 8px; align-items: center; }
+    .step-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--border); transition: all 0.3s; }
+    .step-dot.active { background: var(--accent); width: 28px; border-radius: 5px; }
+    .step-dot.done { background: var(--success); }
+   
+    .feature-card {
+      background: var(--card); border: 2px solid var(--border);
+      border-radius: 20px; padding: 20px;
+      cursor: pointer; transition: all 0.3s;
+    }
+    .feature-card:hover {
+      border-color: var(--accent); transform: translateY(-4px);
+      box-shadow: 0 12px 24px -8px rgba(232, 93, 59, 0.15);
+    }
+   
+    .part-card { background: var(--card); border: 2px solid var(--border); border-radius: 16px; padding: 20px; transition: all 0.3s; }
+    .part-card.active { border-color: var(--accent); background: var(--accent-light); }
+   
+    @media (prefers-reduced-motion: no-preference) {
+      .fade-up { animation: fadeUp 0.6s ease-out backwards; }
+      .fade-up:nth-child(1) { animation-delay: 0.05s; }
+      .fade-up:nth-child(2) { animation-delay: 0.1s; }
+      .fade-up:nth-child(3) { animation-delay: 0.15s; }
+      .fade-up:nth-child(4) { animation-delay: 0.2s; }
+      .fade-up:nth-child(5) { animation-delay: 0.25s; }
+      .fade-up:nth-child(6) { animation-delay: 0.3s; }
+      .fade-up:nth-child(7) { animation-delay: 0.35s; }
+      .fade-up:nth-child(8) { animation-delay: 0.4s; }
+    }
+   
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+   
+    .success-check {
+      width: 80px; height: 80px; border-radius: 50%; background: var(--success);
+      display: flex; align-items: center; justify-content: center;
+      animation: success-pop 0.5s ease-out;
+    }
+    @keyframes success-pop { 0% { transform: scale(0); } 50% { transform: scale(1.2); } 100% { transform: scale(1); } }
+   
+    .pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
+    @keyframes pulse-glow { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+   
+    .screen-time { font-size: 48px; font-weight: 200; color: white; letter-spacing: 2px; }
+    .screen-date { font-size: 14px; color: rgba(255,255,255,0.6); margin-top: 4px; }
+   
+    .volume-display {
+      position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+      background: rgba(0,0,0,0.8); padding: 16px 24px; border-radius: 12px; display: none;
+    }
+    .volume-display.show { display: flex; align-items: center; gap: 12px; }
+    .volume-bars { display: flex; gap: 3px; align-items: flex-end; height: 20px; }
+    .volume-bar { width: 4px; background: white; border-radius: 2px; }
+   
+    .settings-item { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-bottom: 1px solid #eee; }
+    .settings-icon { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; margin-right: 12px; }
+   
+    .wifi-item { display: flex; align-items: center; padding: 12px 16px; border-bottom: 1px solid #eee; cursor: pointer; }
+    .wifi-item:hover { background: #f5f5f5; }
+    .wifi-item.connected { background: #f0fdf4; }
+   
+    .slider-track { width: 100%; height: 6px; background: #e5e5e5; border-radius: 3px; position: relative; }
+    .slider-fill { height: 100%; background: var(--accent); border-radius: 3px; }
+    .slider-thumb { width: 24px; height: 24px; background: white; border: 3px solid var(--accent); border-radius: 50%; position: absolute; top: 50%; transform: translate(-50%, -50%); box-shadow: 0 2px 6px rgba(0,0,0,0.15); }
+   
+    .video-call-screen { background: #1a1a1a; height: 100%; display: flex; flex-direction: column; }
+    .video-call-main { flex: 1; display: flex; align-items: center; justify-content: center; }
+    .video-call-controls { padding: 20px; display: flex; justify-content: center; gap: 20px; }
+    .video-call-btn { width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+   
+    .scan-frame { width: 200px; height: 200px; border: 3px solid var(--accent); border-radius: 16px; position: relative; }
+    .scan-frame::before { content: ''; position: absolute; top: -3px; left: -3px; right: -3px; bottom: -3px; border: 3px solid transparent; border-top-color: white; border-radius: 16px; animation: scan-line 2s linear infinite; }
+    @keyframes scan-line { from { transform: translateY(0); } to { transform: translateY(200px); } }
+   
+    .pay-success { background: white; border-radius: 16px; padding: 24px; text-align: center; }
+   
+    @media (max-width: 640px) {
+      .phone-frame { border-radius: 0; padding: 0; background: transparent; box-shadow: none; }
+      .phone-screen { border-radius: 0; min-height: 100vh; }
+      .phone-notch { display: none; }
+    }
+  </style>
+</head>
+<body class="warm-bg min-h-screen">
+ 
+  <!-- 主页面 -->
+  <div id="home-page" class="min-h-screen py-8 px-4">
+    <div class="max-w-5xl mx-auto">
+     
+      <header class="text-center mb-10 fade-up">
+        <h1 class="text-4xl md:text-5xl font-black mb-3" style="color: var(--fg);">手机学习助手</h1>
+        <p class="text-xl" style="color: var(--muted);">一步一步教您使用智能手机</p>
+      </header>
+     
+      <!-- 分类：基础入门 -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2" style="color: var(--muted);">
+          <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-white" style="background: #6B7280;">1</span>
+          基础入门
+        </h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="feature-card fade-up" onclick="startLesson('hardware')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #6B7280, #4B5563);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">认识手机</h3>
+                <p class="text-sm" style="color: var(--muted);">按键与接口</p>
+              </div>
+            </div>
+          </div>
+         
+          <div class="feature-card fade-up" onclick="startLesson('font')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #8B5CF6, #7C3AED);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M4 7V4h16v3M9 20h6M12 4v16"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">调节字体</h3>
+                <p class="text-sm" style="color: var(--muted);">把字变大</p>
+              </div>
+            </div>
+          </div>
+         
+          <div class="feature-card fade-up" onclick="startLesson('wifi')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #3B82F6, #2563EB);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">连接WiFi</h3>
+                <p class="text-sm" style="color: var(--muted);">上网必备</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+     
+      <!-- 分类：通讯联络 -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2" style="color: var(--muted);">
+          <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-white" style="background: #22C55E;">2</span>
+          通讯联络
+        </h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="feature-card fade-up" onclick="startLesson('call')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #4ADE80, #22C55E);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.36 1.75.7 2.58a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.83.34 1.7.57 2.58.7A2 2 0 0 1 22 16.92z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">打电话</h3>
+                <p class="text-sm" style="color: var(--muted);">拨打电话</p>
+              </div>
+            </div>
+          </div>
+         
+          <div class="feature-card fade-up" onclick="startLesson('wechat')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #07C160, #06AD56);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7.5 6.5c-2.5-1.5-4-4-4-6.5 0-4.5 4.5-8 10-8s10 3.5 10 8-4.5 8-10 8c-1 0-2-.1-3-.4l-3.5 2 .5-3.1z"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">发微信</h3>
+                <p class="text-sm" style="color: var(--muted);">发送消息</p>
+              </div>
+            </div>
+          </div>
+         
+          <div class="feature-card fade-up" onclick="startLesson('video')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #14B8A6, #0D9488);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">视频通话</h3>
+                <p class="text-sm" style="color: var(--muted);">面对面聊天</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+     
+      <!-- 分类：日常生活 -->
+      <div class="mb-8">
+        <h2 class="text-xl font-bold mb-4 flex items-center gap-2" style="color: var(--muted);">
+          <span class="w-8 h-8 rounded-lg flex items-center justify-center text-sm text-white" style="background: #F59E0B;">3</span>
+          日常生活
+        </h2>
+        <div class="grid md:grid-cols-3 gap-4">
+          <div class="feature-card fade-up" onclick="startLesson('camera')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #F472B6, #EC4899);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">拍照</h3>
+                <p class="text-sm" style="color: var(--muted);">拍照保存</p>
+              </div>
+            </div>
+          </div>
+         
+          <div class="feature-card fade-up" onclick="startLesson('pay')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #F97316, #EA580C);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">扫码付款</h3>
+                <p class="text-sm" style="color: var(--muted);">买东西付款</p>
+              </div>
+            </div>
+          </div>
+         
+          <div class="feature-card fade-up" onclick="startLesson('photos')">
+            <div class="flex items-center gap-3 mb-3">
+              <div class="w-12 h-12 rounded-xl flex items-center justify-center" style="background: linear-gradient(135deg, #60A5FA, #3B82F6);">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              </div>
+              <div>
+                <h3 class="text-xl font-bold">看照片</h3>
+                <p class="text-sm" style="color: var(--muted);">相册查看</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+     
+      <div class="text-center fade-up mt-8" style="color: var(--muted);">
+        <p class="text-lg">建议按顺序学习，从基础入门开始</p>
+      </div>
+     
+    </div>
+  </div>
+ 
+  <!-- 学习页面 -->
+  <div id="lesson-page" class="min-h-screen py-8 px-4 hidden">
+    <div class="max-w-4xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <button onclick="goHome()" class="flex items-center gap-2 text-lg px-4 py-2 rounded-full hover:bg-white/50 transition-colors" style="color: var(--fg);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          返回
+        </button>
+        <div class="step-indicator" id="stepIndicator"></div>
+      </div>
+     
+      <div class="text-center mb-8">
+        <h2 class="text-3xl font-bold mb-2" id="lessonTitle"></h2>
+        <p class="text-xl" style="color: var(--muted);" id="lessonSubtitle"></p>
+      </div>
+     
+      <div id="lessonContent"></div>
+     
+      <div class="flex justify-center gap-4 mt-8">
+        <button onclick="prevStep()" id="prevBtn" class="px-8 py-4 text-xl font-bold rounded-2xl border-2 transition-all hover:scale-105" style="border-color: var(--border); color: var(--muted);" disabled>上一步</button>
+        <button onclick="nextStep()" id="nextBtn" class="px-8 py-4 text-xl font-bold rounded-2xl transition-all hover:scale-105" style="background: var(--accent); color: white;">下一步</button>
+      </div>
+    </div>
+  </div>
+ 
+  <!-- 完成页面 -->
+  <div id="success-page" class="min-h-screen flex items-center justify-center py-8 px-4 hidden">
+    <div class="text-center">
+      <div class="success-check mx-auto mb-6">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2 class="text-4xl font-black mb-4">太棒了</h2>
+      <p class="text-xl mb-8" style="color: var(--muted);">您已经学会了这个功能</p>
+      <button onclick="goHome()" class="px-8 py-4 text-xl font-bold rounded-2xl transition-all hover:scale-105" style="background: var(--accent); color: white;">学习其他功能</button>
+    </div>
+  </div>
+
+  <script>
+    // 课程数据
+    const lessons = {
+      hardware: {
+        title: '认识手机', subtitle: '了解手机的各个部件', type: 'hardware',
+        steps: [
+          { part: 'power', name: '电源键', description: '在手机右侧，长按可以开机或关机，短按可以锁屏或唤醒屏幕', tip: '这是电源键，很重要！' },
+          { part: 'volume', name: '音量键', description: '在手机左侧，上面的键是增大音量，下面的键是减小音量', tip: '音量键可以调节声音大小' },
+          { part: 'screen', name: '屏幕', description: '手机正面的大玻璃就是屏幕，用手指轻轻点击或滑动来操作', tip: '屏幕是用手触摸操作的' },
+          { part: 'charging', name: '充电口', description: '在手机底部，用来连接充电器给手机充电', tip: '没电了就要在这里充电' },
+          { part: 'speaker', name: '扬声器', description: '在手机底部，打电话、看视频时声音从这里出来', tip: '声音从这里出来' }
+        ]
+      },
+     
+      font: {
+        title: '调节字体大小', subtitle: '让字变大看得更清楚', type: 'software',
+        steps: [
+          { tip: '第一步：找到"设置"图标，点击它', phoneContent: 'homeScreen', highlight: 'settings-app' },
+          { tip: '第二步：在设置里找到"显示与亮度"，点击进入', phoneContent: 'settingsMain', highlight: 'display-item' },
+          { tip: '第三步：找到"字体大小"，点击进入', phoneContent: 'displaySettings', highlight: 'font-item' },
+          { tip: '第四步：用手指拖动下面的圆点，向右拖动字就变大', phoneContent: 'fontSize', interactive: true },
+          { tip: '太好了！现在字变大了，看起来更舒服', phoneContent: 'fontResult' }
+        ]
+      },
+     
+      wifi: {
+        title: '连接WiFi', subtitle: '连接无线网络上网', type: 'software',
+        steps: [
+          { tip: '第一步：找到"设置"图标，点击它', phoneContent: 'homeScreen', highlight: 'settings-app' },
+          { tip: '第二步：在设置最上面找到"WLAN"或"WiFi"，点击进入', phoneContent: 'settingsMain', highlight: 'wifi-item' },
+          { tip: '第三步：找到您家的WiFi名字，点击它', phoneContent: 'wifiList', highlight: 'home-wifi' },
+          { tip: '第四步：输入WiFi密码，然后点击"连接"', phoneContent: 'wifiPassword' },
+          { tip: '连接成功！现在可以上网了', phoneContent: 'wifiConnected' }
+        ]
+      },
+     
+      call: {
+        title: '学习打电话', subtitle: '跟着步骤，一步一步来', type: 'software',
+        steps: [
+          { tip: '第一步：找到绿色的"电话"图标，点击它', phoneContent: 'homeScreen', highlight: 'phone-app' },
+          { tip: '第二步：看到这个界面了？这是拨号盘', phoneContent: 'dialPad' },
+          { tip: '第三步：用手指点击数字，输入电话号码', phoneContent: 'dialPad', interactive: true },
+          { tip: '第四步：输入完后，点击绿色按钮就可以拨打了', phoneContent: 'dialPadWithNumber' },
+          { tip: '学会了！现在您可以在真手机上试试看', phoneContent: 'dialPadCalling' }
+        ]
+      },
+     
+      wechat: {
+        title: '学习发微信', subtitle: '跟着步骤，一步一步来', type: 'software',
+        steps: [
+          { tip: '第一步：找到绿色的"微信"图标，点击它', phoneContent: 'homeScreen', highlight: 'wechat-app' },
+          { tip: '第二步：这是微信的主界面，显示您的聊天列表', phoneContent: 'wechatList' },
+          { tip: '第三步：点击您想聊天的人', phoneContent: 'wechatList', highlight: 'chat-item' },
+          { tip: '第四步：在下面输入框里打字，然后点击发送', phoneContent: 'wechatChat' },
+          { tip: '太好了！消息已经发出去了', phoneContent: 'wechatSent' }
+        ]
+      },
+     
+      video: {
+        title: '视频通话', subtitle: '面对面聊天', type: 'software',
+        steps: [
+          { tip: '第一步：打开微信，找到要视频通话的人', phoneContent: 'wechatList', highlight: 'chat-item' },
+          { tip: '第二步：点击聊天框右下角的"+"号', phoneContent: 'wechatChatVideo', highlight: 'plus-btn' },
+          { tip: '第三步：在弹出的菜单里点击"视频通话"', phoneContent: 'videoMenu', highlight: 'video-call-btn' },
+          { tip: '第四步：等待对方接听', phoneContent: 'videoCalling' },
+          { tip: '接通了！您可以和对方面对面聊天了', phoneContent: 'videoConnected' }
+        ]
+      },
+     
+      camera: {
+        title: '学习拍照', subtitle: '跟着步骤，一步一步来', type: 'software',
+        steps: [
+          { tip: '第一步：找到"相机"图标，点击它', phoneContent: 'homeScreen', highlight: 'camera-app' },
+          { tip: '第二步：这是拍照界面，镜头对准要拍的东西', phoneContent: 'cameraView' },
+          { tip: '第三步：点击下面的大圆按钮，就可以拍照了', phoneContent: 'cameraView', highlight: 'shutter' },
+          { tip: '太棒了！照片已经保存好了', phoneContent: 'cameraCapture' }
+        ]
+      },
+     
+      pay: {
+        title: '扫码付款', subtitle: '买东西时付款', type: 'software',
+        steps: [
+          { tip: '第一步：打开微信，点击右下角的"我"', phoneContent: 'wechatMain', highlight: 'me-tab' },
+          { tip: '第二步：点击"服务"（或"支付"）', phoneContent: 'wechatMe', highlight: 'pay-btn' },
+          { tip: '第三步：点击"收付款"', phoneContent: 'wechatPay', highlight: 'scan-btn' },
+          { tip: '第四步：向商家出示这个付款码，或者点击"扫码"去扫商家的码', phoneContent: 'payCode' },
+          { tip: '付款成功！记得看清楚付款金额', phoneContent: 'paySuccess' }
+        ]
+      },
+     
+      photos: {
+        title: '学习看照片', subtitle: '查看相册里的照片', type: 'software',
+        steps: [
+          { tip: '第一步：找到"相册"图标，点击它', phoneContent: 'homeScreen', highlight: 'photos-app' },
+          { tip: '第二步：这里显示您拍的所有照片', phoneContent: 'photosGrid' },
+          { tip: '第三步：点击任意一张照片，就可以放大查看', phoneContent: 'photosGrid', highlight: 'photo-item' },
+          { tip: '看！照片放大了，您可以看得更清楚', phoneContent: 'photoView' }
+        ]
+      }
+    };
+
+    let currentLesson = null;
+    let currentStep = 0;
+    let volumeLevel = 5;
+    let fontSizeLevel = 50;
+    let dialedNumber = '';
+
+    function startLesson(lessonId) {
+      currentLesson = lessons[lessonId];
+      currentStep = 0;
+      dialedNumber = '';
+     
+      document.getElementById('home-page').classList.add('hidden');
+      document.getElementById('lesson-page').classList.remove('hidden');
+      document.getElementById('success-page').classList.add('hidden');
+     
+      document.getElementById('lessonTitle').textContent = currentLesson.title;
+      document.getElementById('lessonSubtitle').textContent = currentLesson.subtitle || '';
+     
+      updateStep();
+    }
+
+    function updateStep() {
+      const step = currentLesson.steps[currentStep];
+     
+      const indicator = document.getElementById('stepIndicator');
+      indicator.innerHTML = currentLesson.steps.map((_, i) => {
+        let className = 'step-dot';
+        if (i === currentStep) className += ' active';
+        else if (i < currentStep) className += ' done';
+        return '<div class="' + className + '"></div>';
+      }).join('');
+     
+      if (currentLesson.type === 'hardware') {
+        renderHardwareLesson(step);
+      } else {
+        renderSoftwareLesson(step);
+      }
+     
+      document.getElementById('prevBtn').disabled = currentStep === 0;
+      document.getElementById('nextBtn').textContent = currentStep === currentLesson.steps.length - 1 ? '完成学习' : '下一步';
+    }
+
+    function renderHardwareLesson(step) {
+      const container = document.getElementById('lessonContent');
+     
+      const partDetails = {
+        power: { icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M18.36 6.64a9 9 0 1 1-12.73 0"/><line x1="12" y1="2" x2="12" y2="12"/></svg>', color: '#E85D3B' },
+        volume: { icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>', color: '#3B82F6' },
+        screen: { icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/></svg>', color: '#8B5CF6' },
+        charging: { icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>', color: '#22C55E' },
+        speaker: { icon: '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/></svg>', color: '#F59E0B' }
+      };
+     
+      const detail = partDetails[step.part];
+      const now = new Date();
+     
+      container.innerHTML = `
+        <div class="flex flex-col lg:flex-row gap-8 items-center">
+          <div class="flex-shrink-0">
+            <div class="phone-exterior w-[200px] h-[400px] relative" id="phoneExterior">
+              <div class="phone-button power-button ${step.part === 'power' ? 'highlight' : ''}" onclick="simulateButton('power')"></div>
+              <div class="phone-button volume-up ${step.part === 'volume' ? 'highlight' : ''}" onclick="simulateButton('volumeUp')"></div>
+              <div class="phone-button volume-down ${step.part === 'volume' ? 'highlight' : ''}" onclick="simulateButton('volumeDown')"></div>
+              <div class="charging-port ${step.part === 'charging' ? 'highlight' : ''}" style="${step.part === 'charging' ? 'box-shadow: 0 0 0 3px var(--accent);' : ''}"></div>
+              <div class="speaker-holes" style="left: 30px; bottom: -4px;">${Array(6).fill('<div class="speaker-hole"></div>').join('')}</div>
+              <div class="speaker-holes" style="right: 30px; bottom: -4px;">${Array(6).fill('<div class="speaker-hole"></div>').join('')}</div>
+              <div class="phone-exterior-screen h-full ${step.part === 'screen' ? 'ring-4 ring-orange-400' : ''}">
+                <div class="text-center">
+                  <div class="screen-time">${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}</div>
+                  <div class="screen-date">${now.getMonth() + 1}月${now.getDate()}日 星期${'日一二三四五六'[now.getDay()]}</div>
+                </div>
+              </div>
+              ${renderAnnotation(step.part)}
+            </div>
+          </div>
+          <div class="flex-1 max-w-md">
+            <div class="part-card active mb-6">
+              <div class="flex items-center gap-4 mb-4">
+                <div class="w-14 h-14 rounded-xl flex items-center justify-center" style="background: ${detail.color};">${detail.icon}</div>
+                <div>
+                  <h3 class="text-2xl font-bold">${step.name}</h3>
+                  <p class="text-sm" style="color: var(--muted);">${step.tip}</p>
+                </div>
+              </div>
+              <p class="text-lg leading-relaxed">${step.description}</p>
+            </div>
+            ${renderHardwareDemo(step.part)}
+          </div>
+        </div>
+      `;
+    }
+
+    function renderAnnotation(part) {
+      const annotations = {
+        power: '<div class="annotation visible" style="right: -120px; top: 100px;"><div class="annotation-line" style="transform: rotate(180deg);"></div><div class="annotation-text">电源键</div></div>',
+        volume: '<div class="annotation visible" style="left: -110px; top: 85px;"><div class="annotation-text">音量+</div><div class="annotation-line" style="transform: rotate(180deg);"></div></div><div class="annotation visible" style="left: -110px; top: 135px;"><div class="annotation-text">音量-</div><div class="annotation-line" style="transform: rotate(180deg);"></div></div>',
+        charging: '<div class="annotation visible" style="bottom: -50px; left: 50%; transform: translateX(-50%);"><div class="annotation-text">充电口</div></div>',
+        speaker: '<div class="annotation visible" style="bottom: -50px; left: 50%; transform: translateX(-50%);"><div class="annotation-text">扬声器</div></div>'
+      };
+      return annotations[part] || '';
+    }
+
+    function renderHardwareDemo(part) {
+      const demos = {
+        power: '<div class="bg-gray-100 rounded-xl p-4"><p class="font-bold mb-3 text-lg">试试看：</p><div class="space-y-2 text-base"><p>点击右侧电源键，看屏幕变化</p></div><button onclick="simulatePowerPress()" class="mt-4 px-6 py-3 rounded-xl font-bold text-white" style="background: var(--accent);">模拟按电源键</button></div>',
+        volume: '<div class="bg-gray-100 rounded-xl p-4"><p class="font-bold mb-3 text-lg">试试看：</p><div class="flex gap-3 mt-4"><button onclick="simulateVolumeChange(-1)" class="px-4 py-3 rounded-xl font-bold" style="background: #3B82F6; color: white;">音量减</button><button onclick="simulateVolumeChange(1)" class="px-4 py-3 rounded-xl font-bold" style="background: #3B82F6; color: white;">音量加</button></div></div>',
+        screen: '<div class="bg-gray-100 rounded-xl p-4"><p class="font-bold mb-3 text-lg">小贴士：</p><div class="space-y-2 text-base"><p>1. 用手指轻轻点击，不要用力按</p><p>2. 可以用手指上下左右滑动</p><p>3. 屏幕很娇贵，不要用硬物触碰</p></div></div>',
+        charging: '<div class="bg-gray-100 rounded-xl p-4"><p class="font-bold mb-3 text-lg">充电小提示：</p><div class="space-y-2 text-base"><p>1. 充电时要插紧，但不要太用力</p><p>2. 充电时手机可能会发热，这是正常的</p><p>3. 电充满后记得拔掉充电器</p></div></div>',
+        speaker: '<div class="bg-gray-100 rounded-xl p-4"><p class="font-bold mb-3 text-lg">声音小提示：</p><div class="space-y-2 text-base"><p>1. 打电话时把耳朵贴近顶部听筒</p><p>2. 看视频时声音从底部扬声器出来</p><p>3. 扬声器孔不要被遮挡</p></div></div>'
+      };
+      return demos[part] || '';
+    }
+
+    function simulateButton(type) {
+      if (type === 'power') simulatePowerPress();
+      else if (type === 'volumeUp') simulateVolumeChange(1);
+      else if (type === 'volumeDown') simulateVolumeChange(-1);
+    }
+
+    function simulatePowerPress() {
+      const screen = document.querySelector('.phone-exterior-screen');
+      if (screen) {
+        screen.style.opacity = '0';
+        setTimeout(() => { screen.style.opacity = '1'; }, 500);
+      }
+    }
+
+    function simulateVolumeChange(delta) {
+      volumeLevel = Math.max(0, Math.min(10, volumeLevel + delta));
+    }
+
+    function renderSoftwareLesson(step) {
+      const container = document.getElementById('lessonContent');
+      container.innerHTML = `
+        <div class="flex flex-col items-center">
+          <div class="phone-frame mb-6">
+            <div class="phone-screen w-[280px] h-[500px] relative" id="phoneScreen">
+              <div class="phone-notch"></div>
+              <div id="phoneContent" class="h-full pt-10 overflow-hidden">
+                ${renderPhoneContent(step.phoneContent, step.highlight)}
+              </div>
+            </div>
+          </div>
+          <div class="tip-bubble arrow-bottom text-lg text-center">${step.tip}</div>
+        </div>
+      `;
+    }
+
+    function renderPhoneContent(content, highlight) {
+      const contents = {
+        homeScreen: renderHomeScreen(highlight),
+        settingsMain: renderSettingsMain(highlight),
+        displaySettings: renderDisplaySettings(highlight),
+        fontSize: renderFontSize(),
+        fontResult: renderFontResult(),
+        wifiList: renderWifiList(highlight),
+        wifiPassword: renderWifiPassword(),
+        wifiConnected: renderWifiConnected(),
+        dialPad: renderDialPad(),
+        dialPadWithNumber: renderDialPadWithNumber(),
+        dialPadCalling: renderDialPadCalling(),
+        wechatList: renderWechatList(highlight),
+        wechatChat: renderWechatChat(),
+        wechatChatVideo: renderWechatChatVideo(highlight),
+        wechatSent: renderWechatSent(),
+        videoMenu: renderVideoMenu(highlight),
+        videoCalling: renderVideoCalling(),
+        videoConnected: renderVideoConnected(),
+        cameraView: renderCameraView(highlight),
+        cameraCapture: renderCameraCapture(),
+        wechatMain: renderWechatMain(highlight),
+        wechatMe: renderWechatMe(highlight),
+        wechatPay: renderWechatPay(highlight),
+        payCode: renderPayCode(),
+        paySuccess: renderPaySuccess(),
+        photosGrid: renderPhotosGrid(highlight),
+        photoView: renderPhotoView()
+      };
+      return contents[content] || '<div class="p-4">内容加载中...</div>';
+    }
+
+    // 各种手机界面渲染函数
+    function renderHomeScreen(highlight) {
+      return `
+        <div class="grid grid-cols-4 gap-3 p-4 pt-8">
+          <div class="text-center">
+            <div class="app-icon mx-auto ${highlight === 'phone-app' ? 'highlight' : ''}" style="background: linear-gradient(135deg, #4ADE80, #22C55E);" onclick="nextStep()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.36 1.75.7 2.58a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.83.34 1.7.57 2.58.7A2 2 0 0 1 22 16.92z"/></svg>
+            </div>
+            <span class="text-xs mt-1 block">电话</span>
+          </div>
+          <div class="text-center">
+            <div class="app-icon mx-auto ${highlight === 'wechat-app' ? 'highlight' : ''}" style="background: linear-gradient(135deg, #07C160, #06AD56);" onclick="nextStep()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7.5 6.5c-2.5-1.5-4-4-4-6.5 0-4.5 4.5-8 10-8s10 3.5 10 8-4.5 8-10 8c-1 0-2-.1-3-.4l-3.5 2 .5-3.1z"/></svg>
+            </div>
+            <span class="text-xs mt-1 block">微信</span>
+          </div>
+          <div class="text-center">
+            <div class="app-icon mx-auto ${highlight === 'camera-app' ? 'highlight' : ''}" style="background: linear-gradient(135deg, #F472B6, #EC4899);" onclick="nextStep()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <span class="text-xs mt-1 block">相机</span>
+          </div>
+          <div class="text-center">
+            <div class="app-icon mx-auto ${highlight === 'photos-app' ? 'highlight' : ''}" style="background: linear-gradient(135deg, #60A5FA, #3B82F6);">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <span class="text-xs mt-1 block">相册</span>
+          </div>
+          <div class="text-center">
+            <div class="app-icon mx-auto ${highlight === 'settings-app' ? 'highlight' : ''}" style="background: linear-gradient(135deg, #6B7280, #4B5563);" onclick="nextStep()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+            </div>
+            <span class="text-xs mt-1 block">设置</span>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderSettingsMain(highlight) {
+      return `
+        <div class="bg-gray-100 py-4">
+          <div class="flex items-center px-4 mb-4">
+            <div class="w-6 h-6 rounded-full bg-gray-300 mr-3"></div>
+            <span class="font-bold">设置</span>
+          </div>
+          <div class="bg-white">
+            <div class="settings-item ${highlight === 'wifi-item' ? 'bg-orange-50' : ''}" onclick="nextStep()">
+              <div class="flex items-center">
+                <div class="settings-icon" style="background: #3B82F6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M5 12.55a11 11 0 0 1 14.08 0M1.42 9a16 16 0 0 1 21.16 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg></div>
+                <span>WLAN</span>
+              </div>
+              <span class="text-sm" style="color: #22C55E;">已连接</span>
+            </div>
+            <div class="settings-item ${highlight === 'display-item' ? 'bg-orange-50' : ''}" onclick="nextStep()">
+              <div class="flex items-center">
+                <div class="settings-icon" style="background: #8B5CF6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg></div>
+                <span>显示与亮度</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+            <div class="settings-item">
+              <div class="flex items-center">
+                <div class="settings-icon" style="background: #F59E0B;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <span>隐私与安全</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDisplaySettings(highlight) {
+      return `
+        <div class="bg-gray-100">
+          <div class="bg-white px-4 py-3 border-b flex items-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">显示与亮度</span>
+          </div>
+          <div class="bg-white mt-4">
+            <div class="settings-item">
+              <span>亮度</span>
+              <div class="w-24 h-2 bg-gray-200 rounded-full"><div class="h-full w-1/2 bg-black rounded-full"></div></div>
+            </div>
+            <div class="settings-item ${highlight === 'font-item' ? 'bg-orange-50' : ''}" onclick="nextStep()">
+              <span>字体大小</span>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFontSize() {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white px-4 py-3 border-b flex items-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">字体大小</span>
+          </div>
+          <div class="p-6">
+            <div class="bg-white rounded-xl p-4 mb-6">
+              <p class="text-center" style="font-size: ${12 + fontSizeLevel * 0.2}px;">示例文字：这是字体大小的预览效果</p>
+            </div>
+            <div class="bg-white rounded-xl p-4">
+              <div class="flex justify-between text-sm mb-3">
+                <span>小</span>
+                <span>大</span>
+              </div>
+              <div class="slider-track relative cursor-pointer" onclick="adjustFont(event)">
+                <div class="slider-fill" style="width: ${fontSizeLevel}%;"></div>
+                <div class="slider-thumb" style="left: ${fontSizeLevel}%;"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderFontResult() {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white px-4 py-3 border-b flex items-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">字体大小</span>
+          </div>
+          <div class="p-6">
+            <div class="bg-white rounded-xl p-6 text-center">
+              <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: #dcfce7;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p class="text-2xl font-bold mb-2">字体已调大</p>
+              <p class="text-lg" style="color: var(--muted);">现在看手机更舒服了</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWifiList(highlight) {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white px-4 py-3 border-b flex items-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">WLAN</span>
+          </div>
+          <div class="bg-white mt-2">
+            <div class="wifi-item connected">
+              <div class="flex items-center flex-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                <span class="ml-3">邻居家的WiFi</span>
+              </div>
+              <span class="text-sm" style="color: #22C55E;">已连接</span>
+            </div>
+            <div class="wifi-item ${highlight === 'home-wifi' ? 'bg-orange-50' : ''}" onclick="nextStep()">
+              <div class="flex items-center flex-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+                <span class="ml-3">我家WiFi</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <div class="wifi-item">
+              <div class="flex items-center flex-1">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M5 12.55a11 11 0 0 1 14.08 0M8.53 16.11a6 6 0 0 1 6.95 0"/></svg>
+                <span class="ml-3">CMCC-Free</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWifiPassword() {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white px-4 py-3 border-b flex items-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">我家WiFi</span>
+          </div>
+          <div class="p-4">
+            <div class="bg-white rounded-xl p-4">
+              <label class="text-sm mb-2 block">WiFi密码</label>
+              <input type="password" value="12345678" class="w-full px-4 py-3 border rounded-lg text-lg" style="border-color: #ddd;">
+              <p class="text-sm mt-2" style="color: var(--muted);">请输入WiFi密码</p>
+            </div>
+            <button class="w-full mt-4 py-4 rounded-xl text-white font-bold text-lg" style="background: var(--accent);" onclick="nextStep()">连接</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWifiConnected() {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white px-4 py-3 border-b flex items-center">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">WLAN</span>
+          </div>
+          <div class="p-6">
+            <div class="bg-white rounded-xl p-6 text-center">
+              <div class="w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center" style="background: #dcfce7;">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
+              <p class="text-2xl font-bold mb-2">WiFi已连接</p>
+              <p class="text-lg" style="color: var(--muted);">现在可以上网了</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDialPad() {
+      return `
+        <div class="bg-white h-full flex flex-col">
+          <div class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+              <p class="text-3xl font-light tracking-wider" style="color: var(--fg);">${dialedNumber || '输入号码'}</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-1 p-2">
+            ${['1','2','3','4','5','6','7','8','9','*','0','#'].map(n => `
+              <button class="py-4 text-2xl font-bold rounded-lg hover:bg-gray-100" onclick="dialNumber('${n}')">${n}</button>
+            `).join('')}
+          </div>
+          <div class="p-4 flex justify-center">
+            <button class="w-16 h-16 rounded-full flex items-center justify-center" style="background: #22C55E;" onclick="nextStep()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.36 1.75.7 2.58a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.83.34 1.7.57 2.58.7A2 2 0 0 1 22 16.92z"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDialPadWithNumber() {
+      dialedNumber = '138****5678';
+      return `
+        <div class="bg-white h-full flex flex-col">
+          <div class="flex-1 flex items-center justify-center">
+            <div class="text-center">
+              <p class="text-3xl font-light tracking-wider" style="color: var(--fg);">138****5678</p>
+            </div>
+          </div>
+          <div class="grid grid-cols-3 gap-1 p-2">
+            ${['1','2','3','4','5','6','7','8','9','*','0','#'].map(n => `
+              <button class="py-4 text-2xl font-bold rounded-lg bg-gray-50">${n}</button>
+            `).join('')}
+          </div>
+          <div class="p-4 flex justify-center">
+            <button class="w-16 h-16 rounded-full flex items-center justify-center pulse-glow" style="background: #22C55E;" onclick="nextStep()">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.36 1.75.7 2.58a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.83.34 1.7.57 2.58.7A2 2 0 0 1 22 16.92z"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderDialPadCalling() {
+      return `
+        <div class="h-full flex flex-col" style="background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%);">
+          <div class="flex-1 flex flex-col items-center justify-center text-white">
+            <div class="w-20 h-20 rounded-full bg-gray-600 mb-4 flex items-center justify-center text-3xl font-bold">李</div>
+            <p class="text-xl font-bold">李明</p>
+            <p class="text-sm opacity-70 mt-2">正在呼叫...</p>
+          </div>
+          <div class="p-6 flex justify-center">
+            <button class="w-16 h-16 rounded-full flex items-center justify-center" style="background: #EF4444;">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.36 1.75.7 2.58a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.83.34 1.7.57 2.58.7A2 2 0 0 1 22 16.92z"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWechatList(highlight) {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white px-4 py-3 flex items-center justify-between">
+            <span class="font-bold text-lg">微信</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+          <div class="bg-white mt-2">
+            <div class="flex items-center p-4 border-b ${highlight === 'chat-item' ? 'bg-orange-50' : ''}" onclick="nextStep()">
+              <div class="w-12 h-12 rounded-lg bg-green-500 flex items-center justify-center text-white font-bold mr-3">李</div>
+              <div class="flex-1">
+                <p class="font-bold">李明</p>
+                <p class="text-sm" style="color: var(--muted);">好的，明天见</p>
+              </div>
+              <span class="text-xs" style="color: var(--muted);">10:30</span>
+            </div>
+            <div class="flex items-center p-4 border-b">
+              <div class="w-12 h-12 rounded-lg bg-blue-500 flex items-center justify-center text-white font-bold mr-3">王</div>
+              <div class="flex-1">
+                <p class="font-bold">王芳</p>
+                <p class="text-sm" style="color: var(--muted);">收到，谢谢！</p>
+              </div>
+              <span class="text-xs" style="color: var(--muted);">昨天</span>
+            </div>
+            <div class="flex items-center p-4 border-b">
+              <div class="w-12 h-12 rounded-lg bg-orange-500 flex items-center justify-center text-white font-bold mr-3">家</div>
+              <div class="flex-1">
+                <p class="font-bold">家人群</p>
+                <p class="text-sm" style="color: var(--muted);">妈妈：今晚回来吃饭吗？</p>
+              </div>
+              <span class="text-xs" style="color: var(--muted);">昨天</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWechatChat() {
+      return `
+        <div class="bg-gray-100 h-full flex flex-col">
+          <div class="bg-white px-4 py-3 flex items-center border-b">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">李明</span>
+          </div>
+          <div class="flex-1 p-4 overflow-y-auto">
+            <div class="flex justify-start mb-4">
+              <div class="bg-white rounded-2xl px-4 py-2 max-w-[70%]">
+                <p>明天有空吗？一起吃饭</p>
+              </div>
+            </div>
+            <div class="flex justify-end mb-4">
+              <div class="rounded-2xl px-4 py-2 max-w-[70%]" style="background: #22C55E; color: white;">
+                <p>好的，明天见</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white p-3 flex items-center gap-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            <input type="text" placeholder="输入消息..." class="flex-1 px-4 py-2 rounded-full bg-gray-100">
+            <button class="px-4 py-2 rounded-full text-white font-bold" style="background: #22C55E;" onclick="nextStep()">发送</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWechatChatVideo(highlight) {
+      return `
+        <div class="bg-gray-100 h-full flex flex-col">
+          <div class="bg-white px-4 py-3 flex items-center border-b">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">李明</span>
+          </div>
+          <div class="flex-1 p-4 overflow-y-auto">
+            <div class="flex justify-start mb-4">
+              <div class="bg-white rounded-2xl px-4 py-2 max-w-[70%]">
+                <p>明天有空吗？一起吃饭</p>
+              </div>
+            </div>
+            <div class="flex justify-end mb-4">
+              <div class="rounded-2xl px-4 py-2 max-w-[70%]" style="background: #22C55E; color: white;">
+                <p>好的，明天见</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white p-3 flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full ${highlight === 'plus-btn' ? 'bg-orange-100 ring-2 ring-orange-400' : 'bg-gray-100'} flex items-center justify-center" onclick="nextStep()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+            <input type="text" placeholder="输入消息..." class="flex-1 px-4 py-2 rounded-full bg-gray-100">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M12 19c-4 0-7-3-7-7s3-7 7-7 7 3 7 7-3 7-7 7z"/><path d="M12 11v4M12 15h.01"/></svg>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWechatSent() {
+      return `
+        <div class="bg-gray-100 h-full flex flex-col">
+          <div class="bg-white px-4 py-3 flex items-center border-b">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">李明</span>
+          </div>
+          <div class="flex-1 p-4 overflow-y-auto">
+            <div class="flex justify-start mb-4">
+              <div class="bg-white rounded-2xl px-4 py-2 max-w-[70%]">
+                <p>明天有空吗？一起吃饭</p>
+              </div>
+            </div>
+            <div class="flex justify-end mb-4">
+              <div class="rounded-2xl px-4 py-2 max-w-[70%]" style="background: #22C55E; color: white;">
+                <p>好的，明天见</p>
+              </div>
+            </div>
+            <div class="flex justify-end mb-4">
+              <div class="rounded-2xl px-4 py-2 max-w-[70%]" style="background: #22C55E; color: white;">
+                <p>我现在在外面，晚上联系</p>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white p-3 flex items-center gap-2">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v8M8 12h8"/></svg>
+            <input type="text" placeholder="输入消息..." class="flex-1 px-4 py-2 rounded-full bg-gray-100">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M12 19c-4 0-7-3-7-7s3-7 7-7 7 3 7 7-3 7-7 7z"/><path d="M12 11v4M12 15h.01"/></svg>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVideoMenu(highlight) {
+      return `
+        <div class="bg-gray-100 h-full flex flex-col">
+          <div class="bg-white px-4 py-3 flex items-center border-b">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+            <span class="ml-4 font-bold">李明</span>
+          </div>
+          <div class="flex-1 p-4 overflow-y-auto relative">
+            <div class="flex justify-start mb-4">
+              <div class="bg-white rounded-2xl px-4 py-2 max-w-[70%]">
+                <p>明天有空吗？一起吃饭</p>
+              </div>
+            </div>
+            <div class="flex justify-end mb-4">
+              <div class="rounded-2xl px-4 py-2 max-w-[70%]" style="background: #22C55E; color: white;">
+                <p>好的，明天见</p>
+              </div>
+            </div>
+          </div>
+          <div class="absolute bottom-20 left-0 right-0 bg-white rounded-t-2xl p-4">
+            <div class="grid grid-cols-4 gap-4">
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-blue-500 mx-auto flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </div>
+                <span class="text-xs mt-1 block">相册</span>
+              </div>
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-green-500 mx-auto flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M23 7l-7 5 7 5V7z"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                </div>
+                <span class="text-xs mt-1 block">拍摄</span>
+              </div>
+              <div class="text-center ${highlight === 'video-call-btn' ? 'bg-orange-100 rounded-xl' : ''}" onclick="nextStep()">
+                <div class="w-12 h-12 rounded-full bg-teal-500 mx-auto flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M15.6 11.6L22 7v10l-6.4-4.6v-1z"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+                </div>
+                <span class="text-xs mt-1 block">视频通话</span>
+              </div>
+              <div class="text-center">
+                <div class="w-12 h-12 rounded-full bg-purple-500 mx-auto flex items-center justify-center">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+                </div>
+                <span class="text-xs mt-1 block">语音通话</span>
+              </div>
+            </div>
+          </div>
+          <div class="bg-white p-3 flex items-center gap-2">
+            <div class="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+            </div>
+            <input type="text" placeholder="输入消息..." class="flex-1 px-4 py-2 rounded-full bg-gray-100">
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVideoCalling() {
+      return `
+        <div class="h-full flex flex-col" style="background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%);">
+          <div class="flex-1 flex flex-col items-center justify-center text-white">
+            <div class="w-24 h-24 rounded-full bg-gray-600 mb-4 flex items-center justify-center text-3xl font-bold">李</div>
+            <p class="text-xl font-bold">李明</p>
+            <p class="text-sm opacity-70 mt-2 pulse-glow">等待对方接听...</p>
+          </div>
+          <div class="p-6 flex justify-center gap-8">
+            <button class="w-14 h-14 rounded-full flex items-center justify-center bg-gray-700">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <button class="w-14 h-14 rounded-full flex items-center justify-center" style="background: #EF4444;" onclick="nextStep()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.36 1.75.7 2.58a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.83.34 1.7.57 2.58.7A2 2 0 0 1 22 16.92z" transform="rotate(135 12 12)"/></svg>
+            </button>
+            <button class="w-14 h-14 rounded-full flex items-center justify-center bg-gray-700">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M15.6 11.6L22 7v10l-6.4-4.6v-1z" transform="scale(-1 1) translate(-24 0)"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderVideoConnected() {
+      return `
+        <div class="h-full flex flex-col relative" style="background: linear-gradient(180deg, #2a4a2a 0%, #1a3a1a 100%);">
+          <div class="flex-1 flex items-center justify-center">
+            <div class="text-center text-white">
+              <div class="w-32 h-32 rounded-full bg-gray-500 mx-auto mb-4 flex items-center justify-center text-4xl font-bold">李</div>
+              <p class="text-lg">对方画面</p>
+            </div>
+          </div>
+          <div class="absolute top-4 right-4 w-20 h-28 bg-gray-700 rounded-lg flex items-center justify-center">
+            <span class="text-white text-xs">我</span>
+          </div>
+          <div class="p-6 flex justify-center gap-8 bg-black/30">
+            <button class="w-14 h-14 rounded-full flex items-center justify-center bg-gray-700">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+            </button>
+            <button class="w-14 h-14 rounded-full flex items-center justify-center" style="background: #EF4444;">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.36 1.75.7 2.58a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.83.34 1.7.57 2.58.7A2 2 0 0 1 22 16.92z" transform="rotate(135 12 12)"/></svg>
+            </button>
+            <button class="w-14 h-14 rounded-full flex items-center justify-center bg-gray-700">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="white"><path d="M15.6 11.6L22 7v10l-6.4-4.6v-1z" transform="scale(-1 1) translate(-24 0)"/><rect x="2" y="6" width="14" height="12" rx="2"/></svg>
+            </button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCameraView(highlight) {
+      return `
+        <div class="h-full flex flex-col" style="background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%);">
+          <div class="flex-1 flex items-center justify-center relative">
+            <div class="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+              <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="1"><path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+            <div class="absolute top-4 left-4 flex gap-2">
+              <div class="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+              </div>
+            </div>
+          </div>
+          <div class="p-6 flex justify-center gap-8 bg-black/50">
+            <div class="w-12 h-12 rounded-lg bg-gray-700 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <button class="w-16 h-16 rounded-full bg-white flex items-center justify-center ${highlight === 'shutter' ? 'ring-4 ring-orange-400' : ''}" onclick="nextStep()">
+              <div class="w-14 h-14 rounded-full border-4 border-gray-300"></div>
+            </button>
+            <div class="w-12 h-12 rounded-lg bg-gray-700 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderCameraCapture() {
+      return `
+        <div class="h-full flex flex-col relative" style="background: linear-gradient(180deg, #1a1a1a 0%, #2a2a2a 100%);">
+          <div class="flex-1 flex items-center justify-center relative overflow-hidden">
+            <div class="w-full h-full bg-gradient-to-br from-green-800 to-green-900 flex items-center justify-center">
+              <div class="text-white text-center">
+                <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" class="mx-auto mb-2"><polyline points="20 6 9 17 4 12"/></svg>
+                <p class="text-lg">照片已保存</p>
+              </div>
+            </div>
+          </div>
+          <div class="absolute bottom-4 left-4">
+            <div class="w-16 h-16 rounded-lg bg-white shadow-lg flex items-center justify-center">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+          </div>
+          <div class="p-6 flex justify-center gap-8 bg-black/50">
+            <div class="w-12 h-12 rounded-lg bg-gray-700 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+            </div>
+            <div class="w-16 h-16 rounded-full bg-white flex items-center justify-center">
+              <div class="w-14 h-14 rounded-full border-4 border-gray-300"></div>
+            </div>
+            <div class="w-12 h-12 rounded-lg bg-gray-700 flex items-center justify-center">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="white"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWechatMain(highlight) {
+      return `
+        <div class="bg-gray-100 h-full flex flex-col">
+          <div class="bg-white px-4 py-3 flex items-center justify-between">
+            <span class="font-bold text-lg">微信</span>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </div>
+          <div class="flex-1"></div>
+          <div class="bg-white border-t flex">
+            <div class="flex-1 py-3 text-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#22C55E" class="mx-auto"><path d="M8.5 11a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm5 0a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3zm-7.5 6.5c-2.5-1.5-4-4-4-6.5 0-4.5 4.5-8 10-8s10 3.5 10 8-4.5 8-10 8c-1 0-2-.1-3-.4l-3.5 2 .5-3.1z"/></svg>
+              <span class="text-xs block mt-1" style="color: #22C55E;">微信</span>
+            </div>
+            <div class="flex-1 py-3 text-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#999" class="mx-auto"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+              <span class="text-xs block mt-1 text-gray-500">通讯录</span>
+            </div>
+            <div class="flex-1 py-3 text-center">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#999" class="mx-auto"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+              <span class="text-xs block mt-1 text-gray-500">发现</span>
+            </div>
+            <div class="flex-1 py-3 text-center ${highlight === 'me-tab' ? 'bg-orange-50' : ''}" onclick="nextStep()">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="#999" class="mx-auto"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <span class="text-xs block mt-1 text-gray-500">我</span>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWechatMe(highlight) {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white p-4 flex items-center mb-4">
+            <div class="w-16 h-16 rounded-lg bg-green-500 mr-4"></div>
+            <div>
+              <p class="font-bold text-lg">用户昵称</p>
+              <p class="text-sm" style="color: var(--muted);">微信号：wx123456</p>
+            </div>
+          </div>
+          <div class="bg-white">
+            <div class="settings-item ${highlight === 'pay-btn' ? 'bg-orange-50' : ''}" onclick="nextStep()">
+              <div class="flex items-center">
+                <div class="settings-icon" style="background: #22C55E;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 21V9"/></svg></div>
+                <span>服务</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+          <div class="bg-white mt-4">
+            <div class="settings-item">
+              <div class="flex items-center">
+                <div class="settings-icon" style="background: #3B82F6;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+                <span>收藏</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+            <div class="settings-item">
+              <div class="flex items-center">
+                <div class="settings-icon" style="background: #F59E0B;"><svg width="16" height="16" viewBox="0 0 24 24" fill="white"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+                <span>朋友圈</span>
+              </div>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderWechatPay(highlight) {
+      return `
+        <div class="bg-gray-100 h-full">
+          <div class="bg-white px-4 py-3 flex items-center border-b">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#333"
